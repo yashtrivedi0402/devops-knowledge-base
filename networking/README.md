@@ -37,5 +37,5 @@ This section explains networking from fundamentals to production.
 | NAT Gateway | ✅ |
 | Route Tables | ✅ |
 | Security Groups vs NACL | ✅ |
-| DNS | ⏳ |
-| Load Balancer | ⏳ |
+| DNS | ✅ |
+| Load Balancer | ✅ |
