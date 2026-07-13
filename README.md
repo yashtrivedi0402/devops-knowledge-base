@@ -35,7 +35,7 @@ The goal is not just to memorize interview questions, but to understand:
 
 | Module | Status |
 |---------|---------|
-| Networking | 🟡 In Progress |
+| Networking | ✅ In Progress |
 | Linux | ⏳ Coming Soon |
 | Docker | ⏳ Coming Soon |
 | Kubernetes | ⏳ Coming Soon |
