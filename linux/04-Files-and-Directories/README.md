@@ -1,25 +1,27 @@
-# 📂 Linux File System
+# 📁 Files & Directories in Linux
 
-> **Everything in Linux is treated as a file.**
+> **Everything in Linux is represented as a file.** Whether it's a document, directory, hard disk, USB drive, network socket, printer, or even a running process, Linux treats almost everything as a file.
 >
-> Whether it's a regular file, directory, hard disk, USB device, keyboard, network socket, or even a running process—Linux represents almost everything as a file.
->
-> Understanding the Linux File System is essential for every DevOps Engineer because applications, Docker containers, Kubernetes, logs, configurations, and services all depend on it.
+> Understanding files and directories is one of the most fundamental Linux skills because every DevOps task—deploying applications, managing configurations, troubleshooting servers, or automating infrastructure—involves working with them.
 
 ---
 
 # 📖 Table of Contents
 
-* What is the Linux File System?
-* Why Do We Need It?
-* Problem It Solves
-* Linux File System Architecture
-* Filesystem Hierarchy Standard (FHS)
-* Important Linux Directories
-* Mounting in Linux
-* Everything is a File
-* Absolute vs Relative Path
+* What is a File?
+* What is a Directory?
+* Why Do We Need Them?
+* Linux Directory Tree
 * File Types
+* Absolute vs Relative Path
+* Hidden Files
+* File Naming Rules
+* Common File Operations
+* Inodes Explained
+* Hard Links
+* Symbolic (Soft) Links
+* Searching Files
+* Compression & Archiving
 * Real-World Analogy
 * DevOps Perspective
 * Production Example
@@ -36,412 +38,138 @@
 
 ---
 
-# ❓ What is the Linux File System?
+# ❓ What is a File?
 
-A **Linux File System** is the method Linux uses to organize, store, and retrieve data on storage devices.
+A **file** is a collection of data stored on a storage device.
 
-Unlike Windows, Linux does **not** organize files using drive letters like:
+Examples include:
 
-```text
-C:
-D:
-E:
-```
-
-Instead, Linux starts everything from a **single root directory**:
-
-```text
-/
-```
-
-Every file and every storage device becomes part of this one directory tree.
-
----
-
-# 🎯 Why Do We Need a File System?
-
-Imagine storing millions of files without any organization.
-
-Finding data would become impossible.
-
-The Linux File System provides:
-
-* Organized storage
-* Fast file access
-* Security
-* Permissions
-* Data integrity
-* Efficient disk management
-
-Without a filesystem, Linux would have no structured way to locate or manage data.
-
----
-
-# ⚠️ Problem It Solves
-
-The Linux File System solves several challenges:
-
-* Organizes files logically
-* Separates system files from user files
-* Supports multiple storage devices
-* Provides permissions and ownership
-* Enables efficient data retrieval
-* Allows applications to locate configuration files consistently
-
----
-
-# 🏗️ Linux File System Architecture
-
-```text
-                         /
-                    (Root Directory)
-                          │
- ┌────────┬────────┬────────┬────────┬────────┬────────┐
- │        │        │        │        │        │
- ▼        ▼        ▼        ▼        ▼        ▼
-/bin    /etc    /home    /var    /usr    /tmp
- │        │        │        │        │        │
-Commands Config  Users   Logs   Apps   Temp Files
-```
-
-Everything starts from the **Root Directory (`/`)**.
-
----
-
-# 🌳 Filesystem Hierarchy Standard (FHS)
-
-Linux follows the **Filesystem Hierarchy Standard (FHS)**.
-
-This standard defines where different types of files should be stored.
-
-As a result,
-
-every Linux distribution follows a similar directory structure.
-
----
-
-# 📂 Important Linux Directories
-
-## 📍 /
-
-The root of the entire Linux filesystem.
-
-Everything starts here.
-
----
-
-## 📍 /bin
-
-Contains essential user commands.
-
-Examples:
-
-```bash
-ls
-
-cp
-
-mv
-
-cat
-
-pwd
-```
-
-These commands are required even in single-user mode.
-
----
-
-## 📍 /sbin
-
-Contains system administration commands.
-
-Examples:
-
-```bash
-fsck
-
-reboot
-
-shutdown
-
-mount
-```
-
-Typically used by the root user.
-
----
-
-## 📍 /etc
-
-Contains system configuration files.
+* Text Files
+* Configuration Files
+* Images
+* Videos
+* Log Files
+* Executable Programs
+* Shell Scripts
 
 Examples:
 
 ```text
-/etc/passwd
+nginx.conf
 
-/etc/hosts
+notes.txt
 
-/etc/fstab
+deploy.sh
 
-/etc/ssh/
+app.log
+
+docker-compose.yml
 ```
 
-As a DevOps Engineer, you'll frequently edit files inside `/etc`.
+Everything you create or use in Linux is stored as a file.
 
 ---
 
-## 📍 /home
+# ❓ What is a Directory?
 
-Stores personal directories for normal users.
+A **directory** is a special type of file that stores references to other files and directories.
+
+Think of it as a folder that organizes data.
 
 Example:
 
 ```text
+/home
+
 /home/yash
+
+/home/yash/projects
+
+/home/yash/projects/devops
 ```
 
-Each user has their own home directory.
+Directories make file management efficient and organized.
 
 ---
 
-## 📍 /root
+# 🎯 Why Do We Need Files & Directories?
 
-Home directory of the root (administrator) user.
+Imagine storing millions of files in one place.
 
-Do not confuse:
+Finding anything would be nearly impossible.
+
+Directories help by:
+
+* Organizing data
+* Separating applications
+* Managing user files
+* Storing configurations
+* Improving navigation
+* Simplifying administration
+
+---
+
+# 🏗️ Linux Directory Tree
 
 ```text
 /
+│
+├── home
+│   └── yash
+│       ├── Documents
+│       ├── Downloads
+│       └── Projects
+│
+├── etc
+│
+├── var
+│
+├── usr
+│
+├── tmp
+│
+└── boot
 ```
 
-with
+Every file starts from the **Root Directory (`/`)**.
 
-```text
-/root
+---
+
+# 📄 Linux File Types
+
+Linux supports multiple file types.
+
+| Symbol | Type             | Description                   |
+| ------ | ---------------- | ----------------------------- |
+| `-`    | Regular File     | Text files, scripts, binaries |
+| `d`    | Directory        | Folder containing files       |
+| `l`    | Symbolic Link    | Shortcut to another file      |
+| `c`    | Character Device | Keyboard, Terminal            |
+| `b`    | Block Device     | Hard Disk, SSD                |
+| `s`    | Socket           | Process communication         |
+| `p`    | Named Pipe       | IPC communication             |
+
+View file types:
+
+```bash
+ls -l
 ```
 
-The first is the filesystem root.
-
-The second is the root user's home directory.
-
 ---
 
-## 📍 /var
-
-Stores variable data.
-
-Examples:
-
-* Logs
-* Mail
-* Cache
-* Databases
-
-Examples:
-
-```text
-/var/log/
-
-/var/cache/
-
-/var/lib/
-```
-
-Most production logs are stored under `/var/log`.
-
----
-
-## 📍 /usr
-
-Contains installed software and shared libraries.
-
-Examples:
-
-```text
-/usr/bin
-
-/usr/lib
-
-/usr/share
-```
-
-Think of this as the location for user applications and utilities.
-
----
-
-## 📍 /tmp
-
-Stores temporary files.
-
-Files here may be deleted automatically after reboot.
-
-Applications use this directory for temporary data.
-
----
-
-## 📍 /dev
-
-Contains device files.
-
-Examples:
-
-```text
-/dev/sda
-
-/dev/null
-
-/dev/random
-
-/dev/tty
-```
-
-In Linux,
-
-hardware devices are represented as files.
-
----
-
-## 📍 /proc
-
-A virtual filesystem containing information about running processes and the kernel.
-
-Examples:
-
-```text
-/proc/cpuinfo
-
-/proc/meminfo
-
-/proc/version
-```
-
-Useful for monitoring system information.
-
----
-
-## 📍 /sys
-
-Another virtual filesystem exposing hardware and kernel information.
-
-System administrators use it for device configuration and inspection.
-
----
-
-## 📍 /boot
-
-Contains files required to boot Linux.
-
-Examples:
-
-* Kernel
-* initramfs
-* GRUB configuration
-
----
-
-## 📍 /opt
-
-Used for optional third-party software.
-
-Examples:
-
-* Google Chrome
-* Oracle Software
-* Custom enterprise applications
-
----
-
-## 📍 /mnt
-
-Temporary mount point for storage devices.
-
----
-
-## 📍 /media
-
-Automatically mounts removable media.
-
-Examples:
-
-* USB Drives
-* DVDs
-* External Hard Disks
-
----
-
-# 💾 Mounting in Linux
-
-Linux does not assign drive letters.
-
-Instead,
-
-every storage device is **mounted** somewhere within the filesystem.
-
-Example:
-
-```text
-SSD
-
-↓
-
-Mounted at
-
-/data
-```
-
-or
-
-```text
-USB
-
-↓
-
-Mounted at
-
-/media/yash/USB
-```
-
-Once mounted,
-
-the device becomes part of the same filesystem tree.
-
----
-
-# 🌍 Everything is a File
-
-One of Linux's most important philosophies is:
-
-> **Everything is a File**
-
-Examples:
-
-| Object         | Location      |
-| -------------- | ------------- |
-| Hard Disk      | /dev/sda      |
-| Terminal       | /dev/tty      |
-| CPU Info       | /proc/cpuinfo |
-| Memory Info    | /proc/meminfo |
-| Random Numbers | /dev/random   |
-
-Applications interact with these resources just like ordinary files.
-
----
-
-# 📁 Absolute vs Relative Path
+# 📍 Absolute vs Relative Path
 
 ## Absolute Path
 
-Starts from the root directory.
+Starts from `/`
 
 Example:
 
 ```text
-/home/yash/project/readme.md
+/home/yash/Documents/readme.md
 ```
 
-Always begins with:
+Always starts with:
 
 ```text
 /
@@ -451,112 +179,392 @@ Always begins with:
 
 ## Relative Path
 
-Starts from the current working directory.
+Starts from your current directory.
 
 Example:
 
 ```text
-Documents/project.txt
+Documents/readme.md
 ```
 
-Relative paths do not begin with `/`.
+Useful for navigation inside the current directory.
 
 ---
 
-# 📄 File Types in Linux
+# 👻 Hidden Files
 
-Linux supports several file types.
+Hidden files begin with a dot (`.`).
 
-| Symbol | File Type        |
-| ------ | ---------------- |
-| -      | Regular File     |
-| d      | Directory        |
-| l      | Symbolic Link    |
-| c      | Character Device |
-| b      | Block Device     |
-| p      | Named Pipe       |
-| s      | Socket           |
+Examples:
 
-Use:
+```text
+.git
 
-```bash
-ls -l
+.bashrc
+
+.profile
+
+.env
 ```
 
-to view file types.
+View hidden files:
+
+```bash
+ls -la
+```
+
+These files usually store configuration settings.
+
+---
+
+# 📝 File Naming Rules
+
+Linux filenames:
+
+✅ Can contain:
+
+* Letters
+* Numbers
+* Underscores
+* Hyphens
+* Dots
+
+Examples:
+
+```text
+docker-compose.yml
+
+deploy.sh
+
+notes.txt
+
+project_backup.tar.gz
+```
+
+Avoid:
+
+* Spaces
+* Special characters
+* Long filenames
+
+---
+
+# ⚙️ Common File Operations
+
+## Create File
+
+```bash
+touch file.txt
+```
+
+---
+
+## Create Directory
+
+```bash
+mkdir project
+```
+
+---
+
+## Copy
+
+```bash
+cp source.txt destination.txt
+```
+
+---
+
+## Move / Rename
+
+```bash
+mv old.txt new.txt
+```
+
+---
+
+## Delete File
+
+```bash
+rm file.txt
+```
+
+---
+
+## Delete Directory
+
+```bash
+rm -r folder
+```
+
+---
+
+## Display File
+
+```bash
+cat file.txt
+```
+
+---
+
+## View Beginning
+
+```bash
+head file.txt
+```
+
+---
+
+## View End
+
+```bash
+tail file.txt
+```
+
+---
+
+# 🔑 Inodes
+
+An **inode (Index Node)** stores metadata about a file.
+
+It contains:
+
+* Owner
+* Permissions
+* File Size
+* Timestamps
+* Disk Block Locations
+* Link Count
+
+It **does NOT** store the filename.
+
+The filename is stored separately in the directory.
+
+View inode numbers:
+
+```bash
+ls -i
+```
+
+Architecture:
+
+```text
+Filename
+   │
+   ▼
+ Inode
+   │
+   ▼
+Data Blocks
+```
+
+---
+
+# 🔗 Hard Links
+
+A Hard Link creates another filename pointing to the **same inode**.
+
+Create one:
+
+```bash
+ln file.txt hardlink.txt
+```
+
+Architecture:
+
+```text
+file.txt
+     │
+     ▼
+   Inode
+     ▲
+     │
+hardlink.txt
+```
+
+Characteristics:
+
+* Same inode
+* Same data
+* No original/copy relationship
+* Works even if one filename is deleted
+* Cannot cross filesystems
+
+---
+
+# 🔗 Symbolic (Soft) Links
+
+A Symbolic Link stores the **path** to another file.
+
+Create one:
+
+```bash
+ln -s file.txt shortcut.txt
+```
+
+Architecture:
+
+```text
+shortcut.txt
+      │
+      ▼
+File Path
+      │
+      ▼
+file.txt
+      │
+      ▼
+Inode
+```
+
+Characteristics:
+
+* Own inode
+* Stores file path
+* Can cross filesystems
+* Breaks if the original file is deleted
+
+---
+
+# 📊 Hard Link vs Symbolic Link
+
+| Feature                   | Hard Link | Symbolic Link |
+| ------------------------- | --------- | ------------- |
+| Points To                 | Inode     | File Path     |
+| Same Inode                | ✅ Yes     | ❌ No          |
+| Cross Filesystem          | ❌ No      | ✅ Yes         |
+| Works if Original Deleted | ✅ Yes     | ❌ No          |
+| Own Inode                 | ❌ No      | ✅ Yes         |
+
+---
+
+# 🔍 Searching Files
+
+Search by name:
+
+```bash
+find /home -name "*.txt"
+```
+
+Fast search:
+
+```bash
+locate nginx.conf
+```
+
+Search inside files:
+
+```bash
+grep "ERROR" app.log
+```
+
+---
+
+# 📦 Compression & Archiving
+
+Create a tar archive:
+
+```bash
+tar -cvf backup.tar project/
+```
+
+Extract:
+
+```bash
+tar -xvf backup.tar
+```
+
+Compress:
+
+```bash
+gzip file.txt
+```
+
+Extract:
+
+```bash
+gunzip file.txt.gz
+```
 
 ---
 
 # 🌍 Real-World Analogy
 
-Imagine a large company.
+Imagine a library.
 
-```text
-Company Headquarters (/)
+* **Directory** = Bookshelf
+* **File** = Book
+* **Filename** = Book Title
+* **Inode** = Library Record
+* **Hard Link** = Two catalogue entries for the same book
+* **Symbolic Link** = A note saying "This book is on Shelf B"
 
-├── HR (/home)
-
-├── Finance (/var)
-
-├── Administration (/etc)
-
-├── Equipment (/dev)
-
-├── Temporary Storage (/tmp)
-
-└── Software Department (/usr)
-```
-
-Each department has a dedicated purpose.
-
-Similarly,
-
-every Linux directory has a specific responsibility.
+The book (data) exists independently of how many catalogue entries point to it.
 
 ---
 
 # ☁️ DevOps Perspective
 
-Understanding the Linux File System is essential because you'll constantly work with:
+As a DevOps Engineer, you'll constantly work with files such as:
 
-* `/etc/nginx/`
-* `/etc/systemd/`
-* `/var/log/`
-* `/var/lib/docker/`
-* `/var/lib/kubelet/`
-* `/boot/`
-* `/home/`
-* `/proc/`
+```text
+/etc/nginx/nginx.conf
 
-Most production debugging begins by checking configuration files or logs within these directories.
+/etc/fstab
+
+/etc/hosts
+
+/var/log/syslog
+
+/var/log/nginx/
+
+Dockerfile
+
+docker-compose.yml
+
+Jenkinsfile
+```
+
+You'll frequently:
+
+* Create files
+* Edit configuration files
+* Search logs
+* Copy backups
+* Archive releases
+* Create symbolic links during deployments
 
 ---
 
 # 🏭 Production Example
 
-Suppose NGINX isn't starting.
+Suppose you're deploying version **v2** of an application.
 
-Where should you look?
-
-Configuration:
+Instead of replacing files directly, you maintain:
 
 ```text
-/etc/nginx/
+/opt/app/releases/v1
+
+/opt/app/releases/v2
+
+/opt/app/current
 ```
 
-Logs:
+`current` is a symbolic link.
+
+During deployment:
 
 ```text
-/var/log/nginx/
+current
+
+↓
+
+v2
 ```
 
-Systemd Service:
+Rollback simply changes the symlink back to `v1`.
 
-```text
-/etc/systemd/system/
-```
-
-Understanding the filesystem quickly narrows down where to investigate.
+This is a common deployment strategy in production.
 
 ---
 
@@ -564,155 +572,150 @@ Understanding the filesystem quickly narrows down where to investigate.
 
 ### Question
 
-A server is running out of disk space.
+Your application suddenly starts reading the wrong configuration file after deployment.
 
 How would you troubleshoot?
 
 ### Expected Answer
 
-1. Check disk usage:
+1. Check if configuration files exist.
+2. Verify symbolic links using:
 
 ```bash
-df -h
+ls -l
 ```
 
-2. Identify large directories:
-
-```bash
-du -sh /*
-```
-
-3. Inspect logs:
-
-```text
-/var/log
-```
-
-4. Remove unnecessary temporary files:
-
-```text
-/tmp
-```
-
-5. Verify mounted filesystems:
-
-```bash
-mount
-```
+3. Confirm the symlink points to the correct target.
+4. Check permissions.
+5. Verify file ownership.
+6. Restart the service if necessary.
 
 ---
 
 # 🚀 Production Decision
 
-Follow the FHS standard.
+Use:
 
-Store files where they belong.
-
-Examples:
-
-* Logs → `/var/log`
-* Configuration → `/etc`
-* User data → `/home`
-* Temporary files → `/tmp`
-* Third-party software → `/opt`
-
-This consistency simplifies administration and troubleshooting.
+* **Hard Links** when you need multiple directory entries for the same file within one filesystem.
+* **Symbolic Links** for application releases, shared configurations, version management, and cross-filesystem references.
 
 ---
 
 # 🧠 Senior Engineer Tips
 
-Many beginners memorize directory names.
+Many beginners think:
 
-A senior engineer understands **why** each directory exists.
+> Filename = File
 
-For example:
+Not true.
 
-* `/etc` contains configuration because applications need a standard location.
-* `/var` stores variable data because logs and databases constantly change.
-* `/proc` is virtual because it exposes live kernel information rather than files stored on disk.
+Internally:
 
-Understanding the purpose behind the hierarchy makes troubleshooting much easier.
+```text
+Filename
+
+↓
+
+Inode
+
+↓
+
+Data Blocks
+```
+
+Linux uses the inode to locate data.
+
+The filename is simply a human-friendly reference.
+
+Understanding this concept explains:
+
+* Hard Links
+* Symbolic Links
+* Link Counts
+* File Deletion
+* Storage Management
 
 ---
 
 # 💼 Common Interview Questions
 
-### Q1. What is the Linux File System?
+### Q1. What is the difference between a file and a directory?
 
-The structure Linux uses to organize and manage files and directories.
+A file stores data.
 
----
-
-### Q2. What is the root directory?
-
-`/`
-
-The starting point of the entire filesystem hierarchy.
+A directory stores references to files and other directories.
 
 ---
 
-### Q3. Where are configuration files stored?
+### Q2. What is an inode?
 
-```text
-/etc
-```
+A metadata structure describing a file.
 
 ---
 
-### Q4. Where are log files stored?
+### Q3. Does an inode store the filename?
 
-```text
-/var/log
-```
+No.
 
----
-
-### Q5. What is the difference between `/` and `/root`?
-
-`/` is the root of the filesystem.
-
-`/root` is the home directory of the root user.
+The filename is stored in the directory.
 
 ---
 
-### Q6. What is `/proc`?
+### Q4. Difference between Hard Link and Symbolic Link?
 
-A virtual filesystem providing information about running processes and the kernel.
+Hard Link → Same inode.
+
+Symbolic Link → File path.
 
 ---
 
-### Q7. Why does Linux use mounting instead of drive letters?
+### Q5. Can Hard Links cross filesystems?
 
-Linux integrates all storage devices into one unified directory tree, simplifying navigation and management.
+No.
+
+---
+
+### Q6. Can Symbolic Links cross filesystems?
+
+Yes.
+
+---
+
+### Q7. What happens if the original file is deleted?
+
+Hard Link still works.
+
+Symbolic Link becomes broken.
 
 ---
 
 # 🔥 Common Mistakes
 
-❌ `/root` is the root filesystem.
+❌ Thinking a filename is the actual file.
 
-✅ `/` is the root filesystem.
-
-`/root` is the root user's home directory.
+✅ Linux identifies files using inodes.
 
 ---
 
-❌ `/proc` stores real files.
+❌ Assuming all links behave the same.
 
-✅ `/proc` is a virtual filesystem generated by the kernel.
-
----
-
-❌ `/tmp` stores permanent data.
-
-✅ Files in `/tmp` are temporary and may be deleted automatically.
+✅ Hard Links and Symbolic Links work differently.
 
 ---
 
-❌ Every storage device has its own drive letter.
+❌ Using spaces in filenames.
 
-✅ Linux mounts storage devices within the filesystem hierarchy.
+✅ Prefer:
+
+```text
+project_backup.tar.gz
+```
+
+Instead of:
+
+```text
+My Project Backup.tar.gz
+```
 
 ---
 
@@ -725,23 +728,15 @@ pwd
 ```
 
 ```bash
-ls -l
+ls -la
 ```
 
 ```bash
-tree
+ls -i
 ```
 
 ```bash
-df -h
-```
-
-```bash
-du -sh
-```
-
-```bash
-mount
+stat file.txt
 ```
 
 ```bash
@@ -753,7 +748,11 @@ locate
 ```
 
 ```bash
-lsblk
+readlink symlink
+```
+
+```bash
+tree
 ```
 
 ---
@@ -761,25 +760,41 @@ lsblk
 # 💻 Useful Commands
 
 ```bash
-pwd                # Print current directory
+pwd
 
-ls -la             # List files with details
+ls -la
 
-tree               # Show directory structure
+touch
 
-cd                 # Change directory
+mkdir
 
-df -h              # Filesystem usage
+cp
 
-du -sh *           # Directory size
+mv
 
-mount              # Mounted filesystems
+rm
 
-find               # Search files
+cat
 
-locate             # Fast file search
+head
 
-lsblk              # Block devices
+tail
+
+find
+
+locate
+
+grep
+
+ls -i
+
+stat
+
+ln
+
+ln -s
+
+tree
 ```
 
 ---
@@ -787,50 +802,48 @@ lsblk              # Block devices
 # 💼 Interview Cheat Sheet
 
 ```text
-                      /
-                 (Root Directory)
-                      │
- ┌────────┬────────┬────────┬────────┬────────┐
- │        │        │        │        │
- ▼        ▼        ▼        ▼        ▼
-/etc    /home    /var    /usr    /dev
-Config  Users    Logs    Apps   Devices
+Directory
+      │
+      ▼
+ Filename
+      │
+      ▼
+    Inode
+      │
+      ▼
+ Data Blocks
 ```
 
 Remember:
 
-* `/` → Root of the filesystem
-* `/etc` → Configuration
-* `/home` → User data
-* `/var` → Logs & variable data
-* `/usr` → Applications
-* `/boot` → Boot files
-* `/proc` → Process information
-* `/dev` → Devices
+* Everything is a file.
+* Directories organize files.
+* Inodes store metadata.
+* Hard Links → Same inode.
+* Symbolic Links → File path.
+* Hard Links survive filename deletion.
+* Symbolic Links do not.
 
 ---
 
 # 📚 Summary
 
-The Linux File System organizes all files, directories, devices, and system resources into a single hierarchical structure rooted at `/`.
+Files and directories form the backbone of the Linux operating system. Every application, configuration, log, and executable is organized through the filesystem hierarchy.
 
-By following the Filesystem Hierarchy Standard (FHS), Linux provides consistency across distributions, making system administration, troubleshooting, and application deployment predictable and efficient.
-
-For DevOps Engineers, mastering the Linux File System is essential because nearly every operational task—from editing configurations and inspecting logs to managing containers and diagnosing production issues—depends on navigating this hierarchy effectively.
+Understanding how Linux manages files, directories, inodes, and links enables DevOps Engineers to deploy applications, troubleshoot systems, manage storage, and confidently handle real-world production environments.
 
 ---
 
 # 🔗 Related Topics
 
-⬅️ Previous: **Processes & Threads** → `../03-Processes-and-Threads/README.md`
+⬅️ Previous: **Linux File System** → `../03-Linux-File-System/README.md`
 
-➡️ Next: **Inodes & Links** → `../05-Inodes-and-Links/README.md`
+➡️ Next: **Users & Groups** → `../05-Users-and-Groups/README.md`
 
 ### 📖 Recommended Reading
 
-* Inodes & Links
-* Files & Directories
 * Users & Groups
 * File Permissions
+* Processes & Services
 * Storage & Disks
 * Linux Troubleshooting
