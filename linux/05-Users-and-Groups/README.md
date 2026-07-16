@@ -1,735 +1,521 @@
-# 🔗 Linux Inodes & Links
+# 👥 Linux Users & Groups
 
-> **Every file in Linux has two important parts:**
+> **Linux is a multi-user operating system, which means multiple users can use the same system securely at the same time.**
 >
-> 1. **The filename** (what you see)
-> 2. **The inode** (what Linux actually uses internally)
->
-> Understanding Inodes, Hard Links, and Symbolic (Soft) Links is essential for Linux administrators and DevOps Engineers because it explains how Linux stores files, why deleting one filename doesn't always delete the data, and how files are actually managed on disk.
+> Linux uses **Users** and **Groups** to manage authentication, ownership, permissions, and access control. Every file, process, and service runs under a specific user and group.
 
 ---
 
 # 📖 Table of Contents
 
-* What is an Inode?
-* Why Do We Need Inodes?
-* Problem It Solves
-* Linux File Storage Architecture
-* What Information Does an Inode Store?
-* Inode Number
-* Filename vs Inode
-* Hard Links
-* Symbolic (Soft) Links
-* Hard Link vs Soft Link
-* Real-World Analogy
+* What are Users & Groups?
+* Why Do We Need Them?
+* User Types
+* User Architecture
+* Important Files
+* UID & GID
+* Root User
+* sudo vs su
+* User Management
+* Group Management
 * DevOps Perspective
 * Production Example
-* Real Interview Scenario
-* Production Decision
-* Senior Engineer Tips
-* Common Interview Questions
-* Common Mistakes
-* Troubleshooting
+* Interview Questions
 * Useful Commands
-* Interview Cheat Sheet
 * Summary
 * Related Topics
 
 ---
 
-# ❓ What is an Inode?
+# ❓ What is a User?
 
-An **inode (Index Node)** is a data structure used by the Linux filesystem to store **metadata** about a file.
+A **User** is an identity created in Linux to access and use the system.
 
-Think of the inode as the **identity card** of a file.
+Each user has:
 
-It stores everything about the file **except its filename**.
-
-Every file stored on a Linux filesystem has a unique inode number.
-
----
-
-# 🎯 Why Do We Need Inodes?
-
-Imagine storing millions of files.
-
-Linux needs a fast way to locate:
-
-* File owner
-* File permissions
-* File size
-* File location on disk
-* Timestamps
-
-Instead of searching the entire disk every time,
-
-Linux simply looks up the file's inode.
-
-This makes file access efficient and scalable.
-
----
-
-# ⚠️ Problem It Solves
-
-Without inodes,
-
-Linux would struggle to:
-
-* Track file metadata.
-* Locate file data blocks.
-* Manage permissions.
-* Support hard links.
-* Efficiently organize files.
-
-Inodes provide the foundation for the Linux filesystem.
-
----
-
-# 🏗️ Linux File Storage Architecture
-
-```text
-                Directory
-                     │
-                     ▼
-         +----------------------+
-         |  Filename            |
-         |  notes.txt           |
-         +----------------------+
-                     │
-          Points to Inode Number
-                     │
-                     ▼
-         +----------------------+
-         |     Inode            |
-         | Owner                |
-         | Permissions          |
-         | Size                 |
-         | Timestamps           |
-         | Block Addresses      |
-         +----------------------+
-                     │
-                     ▼
-         +----------------------+
-         |     Data Blocks      |
-         | Actual File Content  |
-         +----------------------+
-```
-
-Notice that:
-
-**Filename ≠ File**
-
-The filename simply points to an inode.
-
-The inode points to the actual data blocks.
-
----
-
-# 📦 What Information Does an Inode Store?
-
-An inode stores:
-
-* File Size
-* File Permissions
-* Owner
-* Group
-* Last Modified Time
-* Last Access Time
-* Last Status Change Time
-* Link Count
-* File Type
-* Disk Block Addresses
-
-It **does NOT** store:
-
-* ❌ Filename
-* ❌ Parent Directory
-
-Those are stored separately in the directory structure.
-
----
-
-# 🔢 Inode Number
-
-Every file has a unique inode number.
-
-Check it using:
-
-```bash
-ls -i
-```
+* Username
+* Password
+* Home Directory
+* User ID (UID)
+* Default Shell
+* Permissions
 
 Example:
 
 ```text
-245893 notes.txt
-
-245894 report.pdf
-
-245895 nginx.conf
+yash
+ubuntu
+root
+jenkins
+mysql
+nginx
 ```
-
-Linux uses these inode numbers internally—not the filenames.
 
 ---
 
-# 📂 Filename vs Inode
+# ❓ What is a Group?
 
-Suppose we create a file.
+A **Group** is a collection of users.
 
-```bash
-touch notes.txt
-```
+Instead of giving permissions individually, Linux allows permissions to be assigned to groups.
 
-Internally,
-
-Linux stores:
+Example:
 
 ```text
-notes.txt
-      │
-      ▼
- Inode 245893
-      │
-      ▼
- Actual File Data
+developers
+admins
+docker
+sudo
 ```
-
-When you open the file,
-
-Linux first finds the inode,
-
-then uses it to locate the data blocks.
 
 ---
 
-# 🔗 Hard Links
+# 🎯 Why Do We Need Users & Groups?
 
-A **Hard Link** is another filename that points to the **same inode**.
+They help Linux:
+
+* Authenticate users
+* Secure files
+* Control access
+* Manage permissions
+* Isolate applications
+* Improve system security
+
+Without users and groups, every user would have unrestricted access to the system.
+
+---
+
+# 👤 Types of Users
+
+### 1. Root User
+
+* Superuser
+* UID = 0
+* Full access to the system
+
+---
+
+### 2. Regular User
+
+Created for daily work.
+
+Example:
+
+```text
+yash
+ubuntu
+john
+```
+
+---
+
+### 3. System Users
+
+Created for services.
+
+Examples:
+
+```text
+mysql
+
+nginx
+
+docker
+
+www-data
+```
+
+These users usually cannot log in.
+
+---
+
+# 🏗️ Linux User Architecture
+
+```text
+                Linux System
+                     │
+        ┌────────────┴────────────┐
+        ▼                         ▼
+     Users                    Groups
+        │                         │
+        └────────────┬────────────┘
+                     ▼
+             Files & Processes
+                     │
+                     ▼
+               Permissions
+```
+
+---
+
+# 🆔 UID & GID
+
+Every user has a **User ID (UID)**.
+
+Every group has a **Group ID (GID)**.
+
+Example:
+
+```text
+User : yash
+UID  : 1000
+
+Group : developers
+GID   : 1001
+```
+
+Linux internally uses UID and GID instead of usernames.
+
+---
+
+# 📂 Important Files
+
+### `/etc/passwd`
+
+Stores user account information.
+
+```bash
+cat /etc/passwd
+```
+
+---
+
+### `/etc/shadow`
+
+Stores encrypted passwords.
+
+Accessible only by root.
+
+```bash
+sudo cat /etc/shadow
+```
+
+---
+
+### `/etc/group`
+
+Stores group information.
+
+```bash
+cat /etc/group
+```
+
+---
+
+# 👑 Root User
+
+The **root** user is the system administrator.
+
+Capabilities:
+
+* Install software
+* Create users
+* Delete users
+* Modify system files
+* Manage services
+
+UID of root:
+
+```text
+0
+```
+
+---
+
+# 🔑 sudo vs su
+
+| sudo                                 | su                             |
+| ------------------------------------ | ------------------------------ |
+| Executes one command as another user | Switches to another user       |
+| Safer                                | Full login shell               |
+| Preferred in production              | Mostly used for administration |
 
 Example:
 
 ```bash
-ln notes.txt backup.txt
+sudo apt update
 ```
-
-Architecture:
-
-```text
-notes.txt
-      │
-      ▼
-    Inode 245893
-      ▲
-      │
-backup.txt
-      │
-      ▼
- Same Data Blocks
-```
-
-Important facts:
-
-* Both filenames point to the same inode.
-* Both are equally valid.
-* There is no "original" or "copy".
-* Deleting one filename does **not** delete the file.
-* The data remains until the **last hard link** is removed.
-
----
-
-# 🔗 Symbolic (Soft) Links
-
-A **Symbolic Link (Symlink)** is a completely separate file that stores the **path** to another file.
-
-Create one:
 
 ```bash
-ln -s notes.txt shortcut.txt
+su -
 ```
-
-Architecture:
-
-```text
-shortcut.txt
-      │
-      ▼
- Own Inode
-      │
- Stores Path
-      ▼
-notes.txt
-      │
-      ▼
- Inode 245893
-      │
-      ▼
- File Data
-```
-
-Unlike a hard link,
-
-the symlink does **not** point directly to the inode.
-
-It points to the filename (path).
 
 ---
 
-# 📊 Hard Link vs Symbolic Link
+# 👤 User Management
 
-| Feature                   | Hard Link  | Symbolic Link |
-| ------------------------- | ---------- | ------------- |
-| Points To                 | Same Inode | File Path     |
-| Own Inode                 | ❌ No       | ✅ Yes         |
-| Cross Filesystems         | ❌ No       | ✅ Yes         |
-| Works if Original Deleted | ✅ Yes      | ❌ No          |
-| Link Count Increases      | ✅ Yes      | ❌ No          |
+### Create User
+
+```bash
+sudo useradd yash
+```
+
+or
+
+```bash
+sudo adduser yash
+```
 
 ---
 
-# ⚙️ What Happens When the Original File is Deleted?
+### Set Password
 
-### Hard Link
-
-```text
-notes.txt
-
-↓
-
-Deleted
-
-↓
-
-backup.txt
-
-↓
-
-Still Works ✅
+```bash
+sudo passwd yash
 ```
-
-The inode still has one remaining reference.
-
-The data stays on disk.
 
 ---
 
-### Symbolic Link
+### Delete User
 
-```text
-notes.txt
-
-↓
-
-Deleted
-
-↓
-
-shortcut.txt
-
-↓
-
-Broken Link ❌
+```bash
+sudo userdel yash
 ```
 
-The symlink points to a path that no longer exists.
+Delete with home directory:
 
-This is called a **dangling symlink**.
+```bash
+sudo userdel -r yash
+```
+
+---
+
+### Change User
+
+```bash
+su - yash
+```
+
+---
+
+# 👥 Group Management
+
+### Create Group
+
+```bash
+sudo groupadd developers
+```
+
+---
+
+### Delete Group
+
+```bash
+sudo groupdel developers
+```
+
+---
+
+### Add User to Group
+
+```bash
+sudo usermod -aG docker yash
+```
+
+---
+
+### View Groups
+
+```bash
+groups yash
+```
+
+or
+
+```bash
+id yash
+```
 
 ---
 
 # 🌍 Real-World Analogy
 
-Imagine a house.
-
-The **house** is the inode.
-
-The **street address** is the filename.
-
-### Hard Link
-
-The same house has **two official addresses**.
+Imagine a company.
 
 ```text
-Main Street 10
-
-Oak Street 25
-
-↓
-
-Same House
+Company
+   │
+   ├── Employees (Users)
+   │
+   ├── Departments (Groups)
+   │
+   └── Office Resources (Files)
 ```
 
-Removing one street sign doesn't remove the house.
+Instead of giving access to every employee individually, access is granted to an entire department.
 
-The other address still works.
-
----
-
-### Symbolic Link
-
-Imagine a sticky note saying:
-
-```text
-"The house you want is on Main Street."
-```
-
-If the house is demolished,
-
-the sticky note still exists,
-
-but it now points to nowhere.
+Linux works the same way.
 
 ---
 
 # ☁️ DevOps Perspective
 
-You'll frequently encounter links in production.
+Users and groups are used everywhere in DevOps.
 
 Examples:
 
-```text
-/etc/systemd/system/
+* Docker daemon → docker group
+* Jenkins → jenkins user
+* MySQL → mysql user
+* NGINX → www-data user
 
-/etc/nginx/
-
-/usr/bin/
-
-/var/www/
-```
-
-Many Linux distributions use symbolic links to:
-
-* Share configuration
-* Manage versions
-* Simplify software upgrades
-
-Container images also contain thousands of hard links and symbolic links to save disk space.
+Applications run using dedicated users to improve security.
 
 ---
 
 # 🏭 Production Example
 
-Suppose:
+A developer cannot run Docker:
 
 ```text
-/opt/app/current
+permission denied while trying to connect to Docker daemon
 ```
 
-is a symbolic link.
+Solution:
 
-It points to:
+```bash
+sudo usermod -aG docker yash
+```
+
+Logout and login again.
+
+Problem solved.
+
+---
+
+# 🎯 Common Interview Questions
+
+### What is UID?
+
+A unique numerical identifier for a user.
+
+---
+
+### What is GID?
+
+A unique numerical identifier for a group.
+
+---
+
+### Difference between adduser and useradd?
+
+* **useradd** is a low-level command.
+* **adduser** is an interactive, user-friendly wrapper.
+
+---
+
+### Difference between sudo and su?
+
+* **sudo** runs a specific command with elevated privileges.
+* **su** switches to another user account.
+
+---
+
+### Which file stores user information?
 
 ```text
-/opt/app/releases/v3.2
+/etc/passwd
 ```
 
-Deploying version 3.3 becomes simple.
+---
 
-Instead of moving files,
-
-you only change the symlink:
+### Which file stores encrypted passwords?
 
 ```text
-current
-
-↓
-
-v3.3
-```
-
-Rollback is equally easy.
-
-This technique is widely used in production deployments.
-
----
-
-# 🎯 Real Interview Scenario
-
-### Question
-
-A symbolic link suddenly stops working.
-
-How would you troubleshoot it?
-
-### Expected Answer
-
-1. Verify the symlink.
-
-```bash
-ls -l
-```
-
-2. Check the target file exists.
-
-```bash
-stat target_file
-```
-
-3. Recreate the symlink if required.
-
-```bash
-ln -sf target new_link
-```
-
-4. Verify permissions.
-
----
-
-# 🚀 Production Decision
-
-Use **Hard Links** when:
-
-* The file must remain accessible even if another filename is removed.
-* Working within the same filesystem.
-
-Use **Symbolic Links** when:
-
-* Linking across different filesystems.
-* Managing application versions.
-* Creating shortcuts.
-* Sharing configuration files.
-
----
-
-# 🧠 Senior Engineer Tips
-
-Many beginners think:
-
-> "The filename is the file."
-
-It's not.
-
-The filename is simply an entry in a directory.
-
-The **inode** is the actual identity of the file.
-
-Understanding this explains:
-
-* Hard Links
-* Symbolic Links
-* Link Counts
-* File Deletion
-
-This concept often separates intermediate Linux users from advanced ones.
-
----
-
-# 💼 Common Interview Questions
-
-### Q1. What is an inode?
-
-A data structure that stores metadata about a file.
-
----
-
-### Q2. Does an inode store the filename?
-
-No.
-
-The filename is stored in the directory.
-
----
-
-### Q3. What is a Hard Link?
-
-Another filename pointing to the same inode.
-
----
-
-### Q4. What is a Symbolic Link?
-
-A separate file containing the path to another file.
-
----
-
-### Q5. Can Hard Links cross filesystems?
-
-No.
-
-Inode numbers are unique only within the same filesystem.
-
----
-
-### Q6. Can Symbolic Links cross filesystems?
-
-Yes.
-
-They simply store a pathname.
-
----
-
-### Q7. What happens if the original file is deleted?
-
-Hard Link:
-
-Still works.
-
-Symbolic Link:
-
-Becomes a broken (dangling) link.
-
----
-
-# 🔥 Common Mistakes
-
-❌ Filename is stored in the inode.
-
-✅ Filename is stored in the directory.
-
----
-
-❌ Hard Links are copies.
-
-✅ They are simply another name for the same inode.
-
----
-
-❌ Deleting one Hard Link deletes the file.
-
-✅ The data remains until the last hard link is removed.
-
----
-
-❌ Symlinks point to an inode.
-
-✅ Symlinks point to a file path.
-
----
-
-# 🔍 Troubleshooting
-
-Useful commands:
-
-```bash
-ls -i
-```
-
-Display inode numbers.
-
----
-
-```bash
-stat file.txt
-```
-
-Display detailed inode metadata.
-
----
-
-```bash
-ls -l
-```
-
-Identify symbolic links.
-
----
-
-```bash
-find . -inum <inode_number>
-```
-
-Find all filenames pointing to a specific inode.
-
----
-
-```bash
-readlink shortcut
-```
-
-Display the target of a symbolic link.
-
----
-
-# 💻 Useful Commands
-
-```bash
-ls -i
-
-stat file.txt
-
-ln file hardlink
-
-ln -s file symlink
-
-readlink symlink
-
-find . -inum <inode>
-
-ls -l
+/etc/shadow
 ```
 
 ---
 
-# 💼 Interview Cheat Sheet
+### Which file stores groups?
 
 ```text
-Directory
-    │
-    ▼
-Filename
-    │
-    ▼
-Inode
-    │
-    ▼
-Data Blocks
+/etc/group
 ```
 
-Hard Link
+---
 
-```text
-File A
-     │
-     ▼
- Inode
-     ▲
-     │
-File B
+# 🔍 Useful Commands
+
+```bash
+whoami
+
+id
+
+groups
+
+who
+
+users
+
+adduser
+
+userdel
+
+groupadd
+
+groupdel
+
+passwd
+
+su
+
+sudo
 ```
 
-Soft Link
+---
+
+# 📑 Interview Cheat Sheet
 
 ```text
-Shortcut
-     │
-     ▼
-Path
-     │
-     ▼
-Original File
+User
+ │
+ ▼
+UID
+ │
+ ▼
+Primary Group
+ │
+ ▼
+GID
+ │
+ ▼
+Files & Processes
+ │
+ ▼
+Permissions
 ```
 
 Remember:
 
-* Inode stores metadata.
-* Filename points to inode.
-* Hard Link → Same inode.
-* Symlink → File path.
-* Hard Links survive filename deletion.
-* Symlinks break if the target disappears.
+* Root UID = 0
+* Every user has a UID
+* Every group has a GID
+* `/etc/passwd` → User details
+* `/etc/shadow` → Passwords
+* `/etc/group` → Groups
+* Use **sudo** instead of logging in as root whenever possible.
 
 ---
 
 # 📚 Summary
 
-The Linux filesystem separates a file's **name** from its **identity**. The identity is the inode, which stores metadata and references to the actual data blocks.
+Linux uses **Users** and **Groups** to provide secure, multi-user access to the system. Every file, process, and service belongs to a user and a group, allowing Linux to enforce permissions and isolate workloads.
 
-Hard Links create multiple filenames for the same inode, while Symbolic Links create a separate file that stores the path to another file.
-
-For DevOps Engineers, understanding inodes and links is essential for troubleshooting storage issues, managing deployments, understanding filesystem behavior, and confidently answering advanced Linux interview questions.
+For DevOps Engineers, understanding users and groups is essential for managing servers, configuring services, securing applications, troubleshooting permission issues, and administering Linux systems in production.
 
 ---
 
 # 🔗 Related Topics
 
-⬅️ Previous: **Linux File System** → `../04-Linux-File-System/README.md`
+⬅️ **Previous:** Files & Directories → `../04-Files-and-Directories/README.md`
 
-➡️ Next: **Files & Directories** → `../06-Files-and-Directories/README.md`
+➡️ **Next:** File Permissions → `../06-File-Permissions/README.md`
 
 ### 📖 Recommended Reading
 
-* Linux File System
-* Files & Directories
 * File Permissions
-* Storage & Disks
+* Processes & Services
+* Systemd & Systemctl
+* SSH & Remote Access
 * Linux Troubleshooting
